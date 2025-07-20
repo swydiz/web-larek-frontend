@@ -1,20 +1,12 @@
-import { Product } from './product';
-import { CartItem } from './product';
+import { Product, CartItem } from './product';
 
-export interface ProductListView {
+export interface MainPageView {
   render(products: Product[]): void;
-}
-
-export interface ProductView {
-  render(product: Product): void;
+  setBasketCount(count: number): void;
 }
 
 export interface CartView {
-  render(cartItems: CartItem[], totalPrice: number): void;
+  render(cartItemElements: HTMLElement[], totalPrice: number): void;
+  setTotalPrice(totalPrice: number): void;
 }
 
-export interface CheckoutView {
-  render(): void;
-  displayError(message: string): void;
-  displaySuccess(): void;
-}

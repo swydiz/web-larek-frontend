@@ -1,9 +1,9 @@
-import { CartItem } from './product';
+export interface ContactFormData {
+  email: string;
+  phone: string;
+}
 
-export interface Order {
-  cartItems: CartItem[];
+export interface DeliveryAddressFormData {
   shippingAddress: string;
-  paymentMethod: string;
-  customerEmail: string;
-  customerPhone: string;
+  paymentMethod: 'online' | 'cash';
 }
