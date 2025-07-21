@@ -1,5 +1,5 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number | null;
@@ -7,7 +7,3 @@ export interface Product {
   category: string;
 }
 
-export interface CartItem {
-  productId: number;
-  quantity: number;
-}

@@ -1,4 +1,4 @@
-import { Product, CartItem } from './product';
+import { Product} from './product';
 
 export interface ProductModel {
   getProducts(): Promise<Product[]>;
@@ -6,7 +6,7 @@ export interface ProductModel {
 }
 
 export interface CartModel {
-  items: CartItem[];
+  items: number[];
   addItem(product: Product): void;
   removeItem(productId: number): void;
   getTotalPrice(): number;

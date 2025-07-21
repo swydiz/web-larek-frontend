@@ -1,4 +1,4 @@
-import { Product, CartItem } from './product';
+import { Product } from './product';
 
 export interface MainPageView {
   render(products: Product[]): void;
@@ -6,7 +6,7 @@ export interface MainPageView {
 }
 
 export interface CartView {
-  render(cartItemElements: HTMLElement[], totalPrice: number): void;
+  render(cartItemElements: HTMLElement[]): void;
   setTotalPrice(totalPrice: number): void;
 }
 
