@@ -6,7 +6,7 @@ export interface ProductModel {
 }
 
 export interface CartModel {
-  items: number[];
+  items: Product[];
   addItem(product: Product): void;
   removeItem(productId: number): void;
   getTotalPrice(): number;
