@@ -26,6 +26,8 @@ export class Api {
     }
 
     get(uri: string) {
+        const url = this.baseUrl + uri; // Формируем полный URL
+        console.log("API Request URL:", url);
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method: 'GET'
@@ -33,7 +35,10 @@ export class Api {
     }
 
     post(uri: string, data: object, method: ApiPostMethods = 'POST') {
-        return fetch(this.baseUrl + uri, {
+        const url = this.baseUrl + uri;
+        console.log("API Request URL:", url);
+        console.log("Request body:", JSON.stringify(data)); // Логирование тела запроса
+        return fetch(url, {
             ...this.options,
             method,
             body: JSON.stringify(data)

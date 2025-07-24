@@ -43,6 +43,12 @@ const config = {
   module: {
     rules: [
       {
+        test: /\.ejs$/,  //  Обрабатываем EJS-файлы
+        use: [
+          'ejs-loader' // Используем ejs-loader
+        ]
+      },
+      {
         test: /\.(ts|tsx)$/i,
         use: ["babel-loader", "ts-loader"],
         exclude: ["/node_modules/"],

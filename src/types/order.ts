@@ -5,5 +5,5 @@ export interface ContactFormData {
 
 export interface DeliveryAddressFormData {
   shippingAddress: string;
-  paymentMethod: 'online' | 'cash';
+  paymentMethod: 'card' | 'cash';
 }
