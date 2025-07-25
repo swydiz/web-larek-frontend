@@ -1,59 +1,51 @@
+import { EventEmitter } from '../components/base/events';
+
 export class ModalView {
     private modalContainer: HTMLElement;
     private modalContentContainer: HTMLElement;
     private closeButton: HTMLButtonElement;
+    private eventEmitter: EventEmitter;
+    private currentContentType: 'cart' | 'productDetail' | 'order' | 'contacts' | 'success' | null = null;
 
-    constructor(modalSelector: string) {
-        this.modalContainer = document.querySelector(modalSelector) as HTMLElement;
-
-        if (!this.modalContainer) {
-            console.error(`Modal with selector "${modalSelector}" not found`);
-            return;
-        }
-
+    constructor(selector: string) {
+        this.modalContainer = document.querySelector(selector) as HTMLElement;
         this.modalContentContainer = this.modalContainer.querySelector('.modal__content') as HTMLElement;
         this.closeButton = this.modalContainer.querySelector('.modal__close') as HTMLButtonElement;
+        this.eventEmitter = new EventEmitter();
 
-        this.initializeEventListeners();
-    }
+        if (!this.modalContainer || !this.modalContentContainer || !this.closeButton) {
+            throw new Error('ModalView: Required elements not found.');
+        }
 
-    private initializeEventListeners(): void {
         this.closeButton.addEventListener('click', () => {
             this.close();
         });
 
-        this.modalContainer.addEventListener('click', (event: MouseEvent) => {
-            const target = event.target as Node;
-            if (target === this.modalContainer || target === this.modalContainer.querySelector('.modal__container')) {
+        this.modalContainer.addEventListener('click', (event) => {
+            if (event.target === this.modalContainer) {
                 this.close();
             }
         });
     }
 
-    setContent(content: HTMLElement): void {
-        if (this.modalContentContainer) {
-            this.modalContentContainer.innerHTML = '';
-            this.modalContentContainer.appendChild(content);
-        } else {
-            console.error('modalContentContainer is null');
-        }
+    setContent(content: HTMLElement, contentType: 'cart' | 'productDetail' | 'order' | 'contacts' | 'success'): void {
+        this.modalContentContainer.innerHTML = '';
+        this.modalContentContainer.appendChild(content);
+        this.currentContentType = contentType;
     }
 
     open(): void {
-        if (this.modalContainer) {
-            this.modalContainer.classList.add('modal_active');
-            document.body.classList.add('no-scroll');
-        }
+        this.modalContainer.classList.add('modal_active');
+        document.body.style.overflow = 'hidden';
     }
 
     close(): void {
-        if (this.modalContainer) {
-            this.modalContainer.classList.remove('modal_active');
-            document.body.classList.remove('no-scroll');
-        }
+        this.modalContainer.classList.remove('modal_active');
+        document.body.style.overflow = '';
+        this.currentContentType = null;
     }
 
-    isOpen(): boolean {
-        return this.modalContainer ? this.modalContainer.classList.contains('modal_active') : false;
+    getCurrentContentType(): 'cart' | 'productDetail' | 'order' | 'contacts' | 'success' | null {
+        return this.currentContentType;
     }
 }

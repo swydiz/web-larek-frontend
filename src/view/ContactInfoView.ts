@@ -1,4 +1,3 @@
-
 import { EventEmitter } from '../components/base/events';
 import { Form } from '../components/Form';
 
@@ -6,65 +5,41 @@ export class ContactInfoView extends Form {
     private emailInput: HTMLInputElement;
     private phoneInput: HTMLInputElement;
     private errorElement: HTMLElement;
-    private paymentMethod: 'card' | 'cash';
-    private shippingAddress: string;
 
-    constructor(formElement: HTMLElement, eventEmitter: EventEmitter, paymentMethod: 'card' | 'cash', shippingAddress: string) {
+    constructor(formElement: HTMLElement, eventEmitter: EventEmitter) {
         super(formElement, eventEmitter);
+
         this.emailInput = formElement.querySelector('input[name="email"]') as HTMLInputElement;
         this.phoneInput = formElement.querySelector('input[name="phone"]') as HTMLInputElement;
         this.errorElement = formElement.querySelector('.form__errors') as HTMLElement;
-        this.paymentMethod = paymentMethod;
-        this.shippingAddress = shippingAddress;
 
         if (!this.emailInput || !this.phoneInput || !this.errorElement) {
             throw new Error('ContactInfoView: Required form elements not found.');
         }
 
-        this.validateForm();
+        this.eventEmitter.on<{ isValid: boolean, errors: string[] }>('contactInfoValidated', (data) => {
+            this.setError(data.errors.join(', '));
+            this.setSubmitButtonState(data.isValid);
+        });
     }
 
     protected handleSubmit(event: Event): void {
-        const email = this.emailInput.value.trim();
-        const phone = this.phoneInput.value.trim();
-        if (this.isValid(email, phone)) {
-            this.eventEmitter.emit('contactsSubmitted', {
-                paymentMethod: this.paymentMethod,
-                shippingAddress: this.shippingAddress,
-                email,
-                phone
-            });
-        }
+        this.eventEmitter.emit('contactsSubmitted', {
+            email: this.emailInput.value,
+            phone: this.phoneInput.value,
+        });
     }
 
     protected handleInputChange(event: Event): void {
-        const email = this.emailInput.value.trim();
-        const phone = this.phoneInput.value.trim();
-        this.validateForm();
-    }
-
-    private validateForm(): void {
-        const email = this.emailInput.value.trim();
-        const phone = this.phoneInput.value.trim();
-        const isValid = this.isValid(email, phone);
-        this.setSubmitButtonState(isValid);
-        if (!email) {
-            this.errorElement.textContent = 'Введите email';
-        } else if (!this.isValidEmail(email)) {
-            this.errorElement.textContent = 'Введите корректный email';
-        } else if (!phone || phone.length < 10) {
-            this.errorElement.textContent = 'Введите корректный телефон (минимум 10 символов)';
-        } else {
-            this.errorElement.textContent = '';
+        const target = event.target as HTMLInputElement;
+        if (target === this.emailInput) {
+            this.eventEmitter.emit('contactInfoInput', { email: target.value });
+        } else if (target === this.phoneInput) {
+            this.eventEmitter.emit('contactInfoInput', { phone: target.value });
         }
     }
 
-    private isValid(email: string, phone: string): boolean {
-        return this.isValidEmail(email) && phone.length >= 10;
-    }
-
-    private isValidEmail(email: string): boolean {
-        const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
-        return emailRegex.test(email);
+    private setError(error: string): void {
+        this.errorElement.textContent = error;
     }
 }

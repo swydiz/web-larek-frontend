@@ -5,17 +5,20 @@ export class MainPageView {
     private basketCounterElement: HTMLElement;
     private basketIconElement: HTMLElement;
     private eventEmitter: EventEmitter;
+    private cardPreviewTemplate: HTMLTemplateElement;
 
-    constructor(
-        productListContainer: HTMLElement,
-        basketCounterElement: HTMLElement,
-        basketIconElement: HTMLElement,
-        eventEmitter: EventEmitter
-    ) {
-        this.productListContainer = productListContainer;
-        this.basketCounterElement = basketCounterElement;
-        this.basketIconElement = basketIconElement;
+    constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
+
+        // Поиск DOM-элементов в конструкторе
+        this.productListContainer = document.querySelector<HTMLElement>('.gallery')!;
+        this.basketCounterElement = document.querySelector<HTMLElement>('.header__basket-counter')!;
+        this.basketIconElement = document.querySelector<HTMLElement>('.header__basket')!;
+        this.cardPreviewTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
+
+        if (!this.productListContainer || !this.basketCounterElement || !this.basketIconElement || !this.cardPreviewTemplate) {
+            throw new Error('One or more required DOM elements not found.');
+        }
 
         this.basketIconElement.addEventListener('click', () => {
             this.eventEmitter.emit('openBasket');
@@ -24,7 +27,7 @@ export class MainPageView {
 
     render(productCardElements: HTMLElement[]): void {
         this.productListContainer.innerHTML = '';
-        productCardElements.forEach((element) => {
+        productCardElements.forEach(element => {
             this.productListContainer.appendChild(element);
         });
     }

@@ -1,9 +1,7 @@
 import { EventEmitter } from '../components/base/events';
-import { Product } from '../types/product';
 
 export class CartView {
     private basketTemplate: HTMLTemplateElement;
-    private basketItemTemplate: HTMLTemplateElement;
     private basketListElement: HTMLElement;
     private basketPriceElement: HTMLElement;
     private checkoutButton: HTMLButtonElement;
@@ -11,11 +9,10 @@ export class CartView {
 
     constructor(eventEmitter: EventEmitter) {
         this.basketTemplate = document.getElementById('basket') as HTMLTemplateElement;
-        this.basketItemTemplate = document.getElementById('card-basket') as HTMLTemplateElement;
         this.eventEmitter = eventEmitter;
 
-        if (!this.basketTemplate || !this.basketItemTemplate) {
-            throw new Error('CartView: Basket or basket item template not found.');
+        if (!this.basketTemplate) {
+            throw new Error('CartView: Basket template not found.');
         }
 
         const basketElement = this.basketTemplate.content.firstElementChild?.cloneNode(true) as HTMLElement;
@@ -32,31 +29,9 @@ export class CartView {
         });
     }
 
-    render(cartItems: Product[]): HTMLElement {
-        this.basketListElement.innerHTML = '';
-
-        cartItems.forEach((item, index) => {
-            const basketItemElement = this.basketItemTemplate.content.firstElementChild?.cloneNode(true) as HTMLElement;
-            const indexElement = basketItemElement.querySelector('.basket__item-index') as HTMLElement;
-            const titleElement = basketItemElement.querySelector('.card__title') as HTMLElement;
-            const priceElement = basketItemElement.querySelector('.card__price') as HTMLElement;
-            const deleteButton = basketItemElement.querySelector('.basket__item-delete') as HTMLButtonElement;
-
-            if (indexElement) indexElement.textContent = (index + 1).toString();
-            if (titleElement) titleElement.textContent = item.title;
-            if (priceElement) priceElement.textContent = item.price !== null ? `${item.price} синапсов` : 'Бесценно';
-            if (deleteButton) {
-                deleteButton.addEventListener('click', () => {
-                    this.eventEmitter.emit('removeFromCart', { productId: item.id });
-                });
-            }
-
-            this.basketListElement.appendChild(basketItemElement);
-        });
-
-        const totalPrice = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
-        this.basketPriceElement.textContent = `${totalPrice} синапсов`;
-
+    render(cartItemElements: HTMLElement[], totalPrice: number): HTMLElement {
+        this.basketListElement.replaceChildren(...cartItemElements);
+        this.setTotalPrice(totalPrice);
         return this.basketListElement.parentElement as HTMLElement;
     }
 

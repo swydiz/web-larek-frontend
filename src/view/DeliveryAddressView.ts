@@ -1,63 +1,49 @@
-
 import { EventEmitter } from '../components/base/events';
 import { Form } from '../components/Form';
 
 export class DeliveryAddressView extends Form {
-    private paymentButtons: NodeListOf<HTMLButtonElement>;
     private addressInput: HTMLInputElement;
+    private paymentButtons: NodeListOf<HTMLButtonElement>;
     private errorElement: HTMLElement;
-    private selectedPaymentMethod: 'card' | 'cash' | null = null;
 
     constructor(formElement: HTMLElement, eventEmitter: EventEmitter) {
         super(formElement, eventEmitter);
-        this.paymentButtons = formElement.querySelectorAll('.order__buttons .button') as NodeListOf<HTMLButtonElement>;
+
         this.addressInput = formElement.querySelector('input[name="address"]') as HTMLInputElement;
+        this.paymentButtons = formElement.querySelectorAll('.button_alt');
         this.errorElement = formElement.querySelector('.form__errors') as HTMLElement;
 
-        if (!this.addressInput || !this.errorElement) {
+        if (!this.addressInput || !this.paymentButtons.length || !this.errorElement) {
             throw new Error('DeliveryAddressView: Required form elements not found.');
         }
 
-        this.paymentButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.paymentButtons.forEach(btn => btn.classList.remove('button_alt_active'));
-                button.classList.add('button_alt_active');
-                this.selectedPaymentMethod = button.name as 'card' | 'cash';
-                this.validateForm();
-            });
+        this.eventEmitter.on<{ isValid: boolean, errors: string[] }>('deliveryAddressValidated', (data) => {
+            this.setError(data.errors.join(', '));
+            this.setSubmitButtonState(data.isValid);
         });
-
-        this.validateForm();
     }
 
     protected handleSubmit(event: Event): void {
-        const address = this.addressInput.value.trim();
-        if (this.isValid(address)) {
-            this.eventEmitter.emit('orderSubmitted', {
-                paymentMethod: this.selectedPaymentMethod!,
-                shippingAddress: address
-            });
-        }
+        const paymentMethod = Array.from(this.paymentButtons).find(btn => btn.classList.contains('button_alt-active'))?.name as 'card' | 'cash';
+        this.eventEmitter.emit('orderSubmitted', {
+            shippingAddress: this.addressInput.value,
+            paymentMethod: paymentMethod || 'card',
+        });
     }
 
     protected handleInputChange(event: Event): void {
-        this.validateForm();
-    }
-
-    private validateForm(): void {
-        const address = this.addressInput.value.trim();
-        const isValid = this.isValid(address);
-        this.setSubmitButtonState(isValid);
-        if (!this.selectedPaymentMethod) {
-            this.errorElement.textContent = 'Выберите способ оплаты';
-        } else if (!address) {
-            this.errorElement.textContent = 'Введите адрес доставки';
-        } else {
-            this.errorElement.textContent = '';
+        const target = event.target as HTMLElement;
+        if (target === this.addressInput) {
+            this.eventEmitter.emit('deliveryAddressInput', { shippingAddress: this.addressInput.value });
+        } else if (this.paymentButtons.length && Array.from(this.paymentButtons).includes(target as HTMLButtonElement)) {
+            const paymentMethod = (target as HTMLButtonElement).name as 'card' | 'cash';
+            this.paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
+            target.classList.add('button_alt-active');
+            this.eventEmitter.emit('deliveryAddressInput', { paymentMethod });
         }
     }
 
-    private isValid(address: string): boolean {
-        return !!this.selectedPaymentMethod && !!address;
+    private setError(error: string): void {
+        this.errorElement.textContent = error;
     }
 }

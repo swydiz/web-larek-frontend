@@ -1,27 +1,19 @@
 import { Product } from '../../types/product';
-import { CDN_URL } from '../../utils/constants';
+import { EventEmitter } from '../base/events';
 
-export class Card {
+export class BasketCard {
     private template: HTMLTemplateElement;
     private element: HTMLElement | null = null;
-    private onClick?: (event: Event) => void;
+    private eventEmitter: EventEmitter;
 
-    constructor(template: HTMLTemplateElement, onClick?: (event: Event) => void) {
+    constructor(template: HTMLTemplateElement, eventEmitter: EventEmitter) {
         this.template = template;
-        this.onClick = onClick;
-
-        // Добавляем обработчик клика в конструкторе
-        if (this.onClick) {
-            this.element = this.template.content.firstElementChild?.cloneNode(true) as HTMLElement;
-            if (this.element) {
-                this.element.addEventListener('click', this.onClick);
-            }
-        }
+        this.eventEmitter = eventEmitter;
     }
 
-    render(data: Product): HTMLElement {
+    render(data: Product, index: number): HTMLElement {
         if (this.element) {
-            this.updateCard(data);
+            this.updateCard(data, index);
             return this.element;
         }
 
@@ -30,32 +22,33 @@ export class Card {
             return document.createElement('div');
         }
 
+        const indexElement = cardElement.querySelector('.basket__item-index') as HTMLElement;
         const titleElement = cardElement.querySelector('.card__title') as HTMLElement;
-        const imageElement = cardElement.querySelector('.card__image') as HTMLImageElement;
         const priceElement = cardElement.querySelector('.card__price') as HTMLElement;
+        const deleteButton = cardElement.querySelector('.basket__item-delete') as HTMLButtonElement;
 
+        if (indexElement) indexElement.textContent = (index + 1).toString();
         if (titleElement) titleElement.textContent = data.title || 'Без названия';
-        if (imageElement) {
-            imageElement.src = `${CDN_URL}${data.image}`;
-            imageElement.alt = data.title || 'Без названия';
-        }
         if (priceElement) priceElement.textContent = data.price !== null ? `${data.price} синапсов` : 'Бесценно';
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+                this.eventEmitter.emit('removeFromCart', { productId: data.id });
+            });
+        }
 
         this.element = cardElement;
         return cardElement;
     }
 
-    private updateCard(data: Product): void {
+    private updateCard(data: Product, index: number): void {
         if (!this.element) return;
+
+        const indexElement = this.element.querySelector('.basket__item-index') as HTMLElement;
         const titleElement = this.element.querySelector('.card__title') as HTMLElement;
-        const imageElement = this.element.querySelector('.card__image') as HTMLImageElement;
         const priceElement = this.element.querySelector('.card__price') as HTMLElement;
 
+        if (indexElement) indexElement.textContent = (index + 1).toString();
         if (titleElement) titleElement.textContent = data.title || 'Без названия';
-        if (imageElement) {
-            imageElement.src = `${CDN_URL}${data.image}`;
-            imageElement.alt = data.title || 'Без названия';
-        }
         if (priceElement) priceElement.textContent = data.price !== null ? `${data.price} синапсов` : 'Бесценно';
     }
 }

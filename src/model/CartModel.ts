@@ -15,18 +15,18 @@ export class CartModel {
             return;
         }
         this.items.push(product);
-        this.eventEmitter.emit<Product[]>('cartUpdated', [...this.items]);
-        this.eventEmitter.emit<{ count: number }>('basketCountUpdated', { count: this.items.length });
+        this.eventEmitter.emit('cartUpdated', { items: [...this.items], totalPrice: this.getTotalPrice() });
+        this.eventEmitter.emit('basketCountUpdated', { count: this.items.length });
     }
 
     removeItem(productId: string): void {
         this.items = this.items.filter(item => item.id !== productId);
-        this.eventEmitter.emit<Product[]>('cartUpdated', this.items);
-        this.eventEmitter.emit<{ count: number }>('basketCountUpdated', { count: this.items.length });
+        this.eventEmitter.emit('cartUpdated', { items: [...this.items], totalPrice: this.getTotalPrice() });
+        this.eventEmitter.emit('basketCountUpdated', { count: this.items.length });
     }
 
     getItems(): Product[] {
-        return this.items;
+        return [...this.items];
     }
 
     getTotalPrice(): number {
