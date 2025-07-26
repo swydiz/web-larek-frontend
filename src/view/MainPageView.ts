@@ -10,7 +10,6 @@ export class MainPageView {
     constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
 
-        // Поиск DOM-элементов в конструкторе
         this.productListContainer = document.querySelector<HTMLElement>('.gallery')!;
         this.basketCounterElement = document.querySelector<HTMLElement>('.header__basket-counter')!;
         this.basketIconElement = document.querySelector<HTMLElement>('.header__basket')!;

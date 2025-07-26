@@ -1,3 +1,4 @@
+
 import { EventEmitter } from '../components/base/events';
 import { Form } from '../components/Form';
 
@@ -32,11 +33,10 @@ export class ContactInfoView extends Form {
 
     protected handleInputChange(event: Event): void {
         const target = event.target as HTMLInputElement;
-        if (target === this.emailInput) {
-            this.eventEmitter.emit('contactInfoInput', { email: target.value });
-        } else if (target === this.phoneInput) {
-            this.eventEmitter.emit('contactInfoInput', { phone: target.value });
-        }
+        this.eventEmitter.emit('contactInfoInput', {
+            email: this.emailInput.value,
+            phone: this.phoneInput.value,
+        });
     }
 
     private setError(error: string): void {

@@ -2,7 +2,7 @@
 import { EventEmitter } from '../components/base/events';
 import { ContactFormData, DeliveryAddressFormData } from '../types/order';
 
-export class OrderModel {
+export class CheckoutModel {
     private deliveryAddress: DeliveryAddressFormData = { shippingAddress: '', paymentMethod: 'card' };
     private contactInfo: ContactFormData = { email: '', phone: '' };
     private eventEmitter: EventEmitter;

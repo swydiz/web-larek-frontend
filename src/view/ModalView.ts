@@ -36,12 +36,13 @@ export class ModalView {
 
     open(): void {
         this.modalContainer.classList.add('modal_active');
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('no-scroll'); 
     }
 
     close(): void {
         this.modalContainer.classList.remove('modal_active');
-        document.body.style.overflow = '';
+        document.body.classList.remove('no-scroll'); 
+        this.modalContentContainer.innerHTML = '';
         this.currentContentType = null;
     }
 

@@ -15,22 +15,20 @@ import { DeliveryAddressView } from './view/DeliveryAddressView';
 import { ContactInfoView } from './view/ContactInfoView';
 import { SuccessView } from './view/SuccessView';
 import { ApiListResponse } from './components/base/api';
-import { OrderModel } from './model/OrderModel';
+import { CheckoutModel } from './model/CheckoutModel';
 import { ContactFormData, DeliveryAddressFormData } from './types/order';
 
-// Инициализация
 const eventEmitter = new EventEmitter();
 const api = new Api(API_URL);
 const productModel = new ProductModel(eventEmitter);
 const cartModel = new CartModel(eventEmitter);
-const orderModel = new OrderModel(eventEmitter);
+const orderModel = new CheckoutModel(eventEmitter);
 const mainPageView = new MainPageView(eventEmitter);
 const modalView = new ModalView('.modal');
 const cartView = new CartView(eventEmitter);
 const basketCardTemplate = document.getElementById('card-basket') as HTMLTemplateElement;
 let currentProductDetail: ProductDetail | null = null;
 
-// Обработчики событий
 eventEmitter.on<Product[]>('productsLoaded', (products: Product[]) => {
     const cardElements = products.map(product => {
         const card = new Card(document.getElementById('card-catalog') as HTMLTemplateElement, () => {
@@ -196,11 +194,11 @@ eventEmitter.on<{ count: number }>('basketCountUpdated', (data: { count: number 
 eventEmitter.on<{ message: string }>('checkoutError', (data) => {
     const errorElement = document.createElement('div');
     errorElement.textContent = data.message;
-    modalView.setContent(errorElement, 'cart'); // Используем 'cart' вместо 'error'
+    modalView.setContent(errorElement, 'cart');
     modalView.open();
 });
 
-// Загрузка товаров
+
 async function loadProducts() {
     try {
         const response = await api.get('/product') as ApiListResponse<Product>;
