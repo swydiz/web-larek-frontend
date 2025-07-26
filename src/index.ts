@@ -182,8 +182,13 @@ eventEmitter.on('closeSuccess', () => {
 });
 
 eventEmitter.on('showProductDetail', (data: { product: Product }) => {
-    currentProductDetail = new ProductDetail(document.getElementById('card-preview') as HTMLTemplateElement, eventEmitter);
-    modalView.setContent(currentProductDetail.render(data.product), 'productDetail');
+    if (!currentProductDetail) {
+        currentProductDetail = new ProductDetail(document.getElementById('card-preview') as HTMLTemplateElement, eventEmitter);
+    }
+    const content = currentProductDetail.render(data.product);
+    const isInCart = cartModel.getItems().some(item => item.id === data.product.id);
+    currentProductDetail.updateButtonState(isInCart);
+    modalView.setContent(content, 'productDetail');
     modalView.open();
 });
 

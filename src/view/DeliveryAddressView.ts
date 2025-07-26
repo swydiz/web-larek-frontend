@@ -1,4 +1,3 @@
-
 import { EventEmitter } from '../components/base/events';
 import { Form } from '../components/Form';
 
@@ -6,6 +5,7 @@ export class DeliveryAddressView extends Form {
     private addressInput: HTMLInputElement;
     private paymentButtons: NodeListOf<HTMLButtonElement>;
     private errorElement: HTMLElement;
+    private hasInteracted: boolean = false; 
 
     constructor(formElement: HTMLElement, eventEmitter: EventEmitter) {
         super(formElement, eventEmitter);
@@ -23,30 +23,30 @@ export class DeliveryAddressView extends Form {
         });
 
         this.eventEmitter.on<{ isValid: boolean, errors: string[] }>('deliveryAddressValidated', (data) => {
-            this.setError(data.errors.join(', '));
+            if (this.hasInteracted) { 
+                this.setError(data.errors.join(', '));
+            }
             this.setSubmitButtonState(data.isValid);
         });
 
-        this.eventEmitter.emit('deliveryAddressInput', {
-            shippingAddress: this.addressInput.value,
-            paymentMethod: this.getActivePaymentMethod() || 'card',
-        });
+        this.setSubmitButtonState(false); 
     }
 
     protected handleSubmit(event: Event): void {
         const paymentMethod = this.getActivePaymentMethod();
         this.eventEmitter.emit('orderSubmitted', {
             shippingAddress: this.addressInput.value,
-            paymentMethod: paymentMethod || 'card',
+            paymentMethod: paymentMethod || '',
         });
     }
 
     protected handleInputChange(event: Event): void {
         const target = event.target as HTMLElement;
         if (target === this.addressInput) {
+            this.hasInteracted = true;
             this.eventEmitter.emit('deliveryAddressInput', {
                 shippingAddress: this.addressInput.value,
-                paymentMethod: this.getActivePaymentMethod() || 'card',
+                paymentMethod: this.getActivePaymentMethod() || '',
             });
         }
     }
@@ -55,6 +55,7 @@ export class DeliveryAddressView extends Form {
         const target = event.target as HTMLButtonElement;
         const paymentMethod = target.name as 'card' | 'cash';
 
+        this.hasInteracted = true; 
         this.paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
         target.classList.add('button_alt-active');
 
@@ -65,7 +66,7 @@ export class DeliveryAddressView extends Form {
     }
 
     private getActivePaymentMethod(): 'card' | 'cash' | undefined {
-        return Array.from(this.paymentButtons).find(btn => btn.classList.contains('button_alt-active'))?.name as 'card' | 'cash';
+        return Array.from(this.paymentButtons).find(btn => btn.classList.contains('button_alt-active'))?.name as 'card' | 'cash' | undefined;
     }
 
     private setError(error: string): void {

@@ -1,6 +1,6 @@
+import { EventEmitter } from '../../components/base/events';
 import { Product } from '../../types/product';
 import { CDN_URL } from '../../utils/constants';
-import { EventEmitter } from '../base/events';
 import { normalizeCategory } from '../../utils/category';
 
 export class ProductDetail {
@@ -23,7 +23,7 @@ export class ProductDetail {
         this.addToCartButton = this.element.querySelector('.card__button') as HTMLButtonElement;
         if (this.addToCartButton) {
             this.addToCartButton.addEventListener('click', (event) => {
-                event.stopPropagation();
+                event.preventDefault();
                 if (this.currentProductId) {
                     this.eventEmitter.emit('toggleCartItem', { productId: this.currentProductId });
                 } else {
@@ -58,14 +58,15 @@ export class ProductDetail {
 
         if (this.addToCartButton) {
             this.addToCartButton.disabled = data.price === null;
-            this.addToCartButton.textContent = data.price === null ? 'В корзину' : 'В корзину';
-            this.eventEmitter.emit('checkCartItem', { productId: data.id });
         }
     }
 
     render(data: Product): HTMLElement {
         this.currentProductId = data.id;
         this.updateElement(data);
+        if (this.currentProductId) {
+            this.eventEmitter.emit('checkCartItem', { productId: this.currentProductId });
+        }
         return this.element;
     }
 
